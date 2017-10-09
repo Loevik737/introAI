@@ -17,6 +17,7 @@ class Board:
         self.nodes = []
         self.root = None
         self.goal = None
+        self.weights = {'w': 100, 'm':50, 'f':10, 'g':5, 'r':1}
         with open("boards/"+board,'r') as file:
             while self.goal == None:
                 row = col = 0
@@ -44,11 +45,13 @@ class Open:
         self.list.append(node)
         self.list.sort(key=lambda x: x.f,reverse=True)
 
+
 def getNode(node,board,neighbors,i,j):
     try:
         if (node.row + i > -1) and (node.col+j > -1):
             if board.nodes[node.row + i][node.col+j] is not '#':
-                newNode = Node(node.row+i,node.col+j,node.g+1,0)
+                newNode = Node(node.row+i,node.col+j,node.g,0)
+                newNode.g += board.weights[board.nodes[node.row + i][node.col+j]]
                 newNode.h = newNode.manhattanDist(board.goal)
                 newNode.calcF()
                 return newNode
@@ -79,7 +82,8 @@ def propagatePathImprovements(node):
             propagatePathImprovements(child)
 
 def main():
-    board = Board("board-1-4.txt")
+    print("fds")
+    board = Board("board-2-1.txt")
     root  = board.root
     goal = board.goal
     CLOSED = []
@@ -117,7 +121,6 @@ def main():
                     if node in CLOSED:
                         propagatePathImprovements(node)
         print(".......")
-
     if solution:
         parentNode = solution.parent
         while parentNode:
