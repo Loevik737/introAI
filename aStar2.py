@@ -1,3 +1,4 @@
+import png
 class Node:
     def __init__(self,row,col,g,h):
         self.row = row
@@ -10,6 +11,7 @@ class Node:
     def calcF(self):
         self.f = self.g + self.h
     def manhattanDist(self,target):
+        #33.2 = average weight multiplyer?
         return  abs(self.row - target.row) + abs(self.col - target.col)
 
 class Board:
@@ -17,7 +19,7 @@ class Board:
         self.nodes = []
         self.root = None
         self.goal = None
-        self.weights = {'w': 100, 'm':50, 'f':10, 'g':5, 'r':1}
+        self.weights = {'w': 100, 'm':50, 'f':10, 'g':5, 'r':1, 'B':0}
         with open("boards/"+board,'r') as file:
             while self.goal == None:
                 row = col = 0
@@ -45,14 +47,13 @@ class Open:
         self.list.append(node)
         self.list.sort(key=lambda x: x.f,reverse=True)
 
-
 def getNode(node,board,neighbors,i,j):
     try:
         if (node.row + i > -1) and (node.col+j > -1):
             if board.nodes[node.row + i][node.col+j] is not '#':
                 newNode = Node(node.row+i,node.col+j,node.g,0)
-                newNode.g += board.weights[board.nodes[node.row + i][node.col+j]]
                 newNode.h = newNode.manhattanDist(board.goal)
+                print('Weight:',str(newNode.g))
                 newNode.calcF()
                 return newNode
     except Exception as e:
@@ -69,7 +70,7 @@ def getNeighbors(node,board):
 
 def attachAndEval(node,X,board):
     node.parent = X
-    node.g = X.g + X.manhattanDist(node)
+    node.g = X.g + board.weights[board.nodes[node.row][node.col]]
     node.h = node.manhattanDist(board.goal)
     node.calcF()
 
@@ -77,13 +78,12 @@ def propagatePathImprovements(node):
     for child in node.children:
         if node.g + node.manhattanDist(child) < child.g:
             child.parent = node
-            child.g = g.node + child.manhattanDist(node)
+            child.g = node.g + child.manhattanDist(node)
             child.calcF()
             propagatePathImprovements(child)
 
 def main():
-    print("fds")
-    board = Board("board-2-1.txt")
+    board = Board("board-2-4.txt")
     root  = board.root
     goal = board.goal
     CLOSED = []
@@ -93,7 +93,7 @@ def main():
     while(not finished):
         if OPEN.list == []:
             finished = True
-            pass
+            break
         else:
             X = OPEN.list.pop()
             CLOSED.append(X)
@@ -120,6 +120,7 @@ def main():
                     attachAndEval(node,X,board)
                     if node in CLOSED:
                         propagatePathImprovements(node)
+
         print(".......")
     if solution:
         parentNode = solution.parent

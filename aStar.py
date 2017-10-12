@@ -48,7 +48,7 @@ def getNode(node,board,neighbors,i,j):
     try:
         if (node.row + i > -1) and (node.col+j > -1):
             if board.nodes[node.row + i][node.col+j] is not '#':
-                newNode = Node(node.row+i,node.col+j,node.g+1,0)
+                newNode = Node(node.row+i,node.col+j,node.g,0)
                 newNode.h = newNode.manhattanDist(board.goal)
                 newNode.calcF()
                 return newNode
@@ -66,7 +66,7 @@ def getNeighbors(node,board):
 
 def attachAndEval(node,X,board):
     node.parent = X
-    node.g = X.g + X.manhattanDist(node)
+    node.g = X.g + 1
     node.h = node.manhattanDist(board.goal)
     node.calcF()
 
