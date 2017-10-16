@@ -1,7 +1,8 @@
 """""""""""
-This implementation of the A * algorithm is written with help from the "Essentials of the A* Algorithm"
+This implementation of the BFS algorithm is written with help from the "Essentials of the A* Algorithm"
 document. The code should be clear if the reader have read the "The Basic A* Algorithm" section, but I
-have still tried to comment the code as much as possible.
+have still tried to comment the code as much as possible. The only thing changed from aStar2 is how we
+handle the OPEN list
 """""""""""
 import hashlib
 import time
@@ -57,6 +58,7 @@ class Board:
                 nodesAppended = True
 
 #Open is a class for the open list so its easier to append and sort the list
+#notice that we don't sort since we want to have a normal FIFO queue
 class Open:
     def __init__(self,root):
         self.list = []
@@ -65,7 +67,6 @@ class Open:
     def pushNode(self,node):
         node.status = "Open"
         self.list.append(node)
-        self.list.sort(key=lambda x: x.f,reverse=True)
 
 #get node makes a new node from a cell on the board. In this algorithm it is used to make
 #a new neighboring/successing node for a node on the board
@@ -122,7 +123,8 @@ def main():
     while(not solution):
         if OPEN.list == []:
             break
-        X = OPEN.list.pop()
+        #poppigng the firs element in the list
+        X = OPEN.list.pop(0)
         CLOSED.append(X)
         X.status = "Closed"
         if X.state == board.goal.state:

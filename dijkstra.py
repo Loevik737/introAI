@@ -1,10 +1,10 @@
 """""""""""
-This implementation of the A * algorithm is written with help from the "Essentials of the A* Algorithm"
+This implementation of the Djikstra algorithm is written with help from the "Essentials of the A* Algorithm"
 document. The code should be clear if the reader have read the "The Basic A* Algorithm" section, but I
-have still tried to comment the code as much as possible.
+have still tried to comment the code as much as possible. The only thing differing form the aStrar2 algorithm
+is that we sort the Open list by g and not f.
 """""""""""
 import hashlib
-import time
 
 #The node class represents a cell on the board.
 class Node:
@@ -65,7 +65,8 @@ class Open:
     def pushNode(self,node):
         node.status = "Open"
         self.list.append(node)
-        self.list.sort(key=lambda x: x.f,reverse=True)
+        #sort by g instead of f
+        self.list.sort(key=lambda x: x.g,reverse=True)
 
 #get node makes a new node from a cell on the board. In this algorithm it is used to make
 #a new neighboring/successing node for a node on the board
@@ -114,7 +115,6 @@ def propagatePathImprovements(node):
 
 #since the program is pretty much the exact same as the A* example in the "Essentials of the A* Algorithm" I wont comment much
 def main():
-    startTime = time.time()
     board = Board("board-1-1.txt")
     CLOSED = []
     OPEN = Open(board.root)
@@ -147,7 +147,7 @@ def main():
     #through the parents of the nodes. Since that path is the shortest path, we change the symbol at that nodes position on the
     #board to an 'o' so we can see the path. Then we finaly print the solution.
     if solution:
-        print("Found a solution with a path cost of:",solution.g,"in:",str(time.time()-startTime),"seconds.")
+        print("Found a solution with a path cost of:",solution.g)
         parentNode = solution.parent
         while parentNode:
             board.nodes[parentNode.row][parentNode.col]= 'o'
