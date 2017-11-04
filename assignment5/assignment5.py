@@ -109,8 +109,30 @@ class CSP:
         assignments and inferences that took place in previous
         iterations of the loop.
         """
-        # TODO: IMPLEMENT THIS
-        
+        #chscking if we have found a solution, if we have we return assignment
+        finished = True
+        for x in assignment:
+            if len(assignment[x]) > 1:
+                finished = False
+                break
+        if finished:
+            return assignment
+
+        #find a variable that is not assigned yet
+        var = self.select_unassigned_variable(assignment)
+
+        #this for loop is the exact same as the book exeppt that we
+        for value in assignment[var]:
+            assignmentCopy = copy.deepcopy(assignment)
+            assignmentCopy[var] = [value]
+            inference = self.inference(assignmentCopy, self.get_all_neighboring_arcs(var))
+            if inference:
+                result = self.backtrack(assignmentCopy)
+                if result:
+                    return result
+        return False
+
+
 
     def select_unassigned_variable(self, assignment):
         """The function 'Select-Unassigned-Variable' from the pseudocode
@@ -119,7 +141,10 @@ class CSP:
         of legal values has a length greater than one.
         """
         # TODO: IMPLEMENT THIS
-        pass
+        #return an unassigned variable that has more than 1 possible value
+        for x in assignment:
+            if len(assignment[x]) > 1:
+                return x
 
     def inference(self, assignment, queue):
         """The function 'AC-3' from the pseudocode in the textbook.
@@ -127,8 +152,18 @@ class CSP:
         the lists of legal values for each undecided variable. 'queue'
         is the initial queue of arcs that should be visited.
         """
-        # TODO: IMPLEMENT THIS
-        pass
+        while len(queue) > 0:
+            postup = queue.pop()
+            Xi = postup[0]
+            Xj = postup[1]
+            if self.revise(assignment,Xi,Xj):
+                if len(assignment[Xi]) == 0:
+                    return False
+                for Xk, _ in self.get_all_neighboring_arcs(Xi):
+                    if Xk != Xj:
+                        queue.append((Xk,Xi))
+        return True
+
 
     def revise(self, assignment, i, j):
         """The function 'Revise' from the pseudocode in the textbook.
@@ -139,8 +174,24 @@ class CSP:
         between i and j, the value should be deleted from i's list of
         legal values in 'assignment'.
         """
-        # TODO: IMPLEMENT THIS
-        pass
+
+        inconsistencies = []
+        inconsistent = False
+        for x in assignment[i]:
+            foundInconsistency = False
+            for y in assignment[j]:
+                if (x, y) in self.constraints[i][j]:
+                    foundInconsistency = True
+                    break
+            if not foundInconsistency:
+                inconsistencies.append(x)
+                if not inconsistent:
+                    inconsistent = True
+
+        for x in inconsistencies:
+            assignment[i].remove(x)
+
+        return inconsistencies
 
 def create_map_coloring_csp():
     """Instantiate a CSP representing the map coloring problem from the
@@ -203,9 +254,12 @@ def print_sudoku_solution(solution):
 
 
 def main():
-    csp = create_sudoku_csp("easy.txt")
+    csp = create_sudoku_csp("hard.txt")
     solution = csp.backtracking_search()
-    #print_sudoku_solution(solution)
+    if not solution:
+        print("Found no solution")
+    else:
+        print_sudoku_solution(solution)
 
 
 if __name__ == "__main__":
